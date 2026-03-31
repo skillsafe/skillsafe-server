@@ -159,7 +159,7 @@ function dashboardPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
   function renderCard(s){
     var ns=h(s.namespace||"");
     var name=h(s.name||"");
-    var href="/skill/"+encodeURIComponent(s.namespace||"")+"/"+encodeURIComponent(s.name||"");
+    var href="/skill/"+(s.namespace||"")+"/"+(s.name||"");
     var desc=h(s.description||"No description.");
     var ver=h(s.latest_version||"—");
     var cat=s.category?'<span class="badge badge-neutral">'+h(s.category)+'</span>':"";
@@ -287,13 +287,14 @@ function dashboardPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
 
 function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
   const url = new URL(c.req.url);
+  const origin = url.origin; // e.g. http://localhost:9787
   const path = url.pathname;
   // path: /skill/@ns/name  or  /skill/ns/name
   const raw = path.replace(/^\/skill\//, "");
   const parts = raw.split("/");
-  let ns = parts[0] || "";
+  let ns = decodeURIComponent(parts[0] || "");
   if (!ns.startsWith("@")) ns = "@" + ns;
-  const name = parts[1] || "";
+  const name = decodeURIComponent(parts[1] || "");
 
   if (!ns || !name) return notFound(path);
 
@@ -424,7 +425,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
         <div class="install-block">
           <p class="install-label">via CLI</p>
           <div class="copy-row">
-            <code id="install-cmd" class="install-code">skillsafe --api-base http://localhost:8787 install ${h(ns)}/${h(name)}</code>
+            <code id="install-cmd" class="install-code">skillsafe --api-base ${origin} install ${h(ns)}/${h(name)}</code>
             <button class="copy-btn" type="button" onclick="copyInstall()" title="Copy install command">
               <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             </button>
@@ -433,7 +434,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
         <div class="install-block">
           <p class="install-label">via curl</p>
           <div class="copy-row">
-            <code class="install-code" id="curl-cmd">curl -fsSL https://skillsafe.ai/scripts/skillsafe.py | python3 - install --registry http://localhost:8787 ${h(ns)}/${h(name)}</code>
+            <code class="install-code" id="curl-cmd">curl -fsSL https://skillsafe.ai/scripts/skillsafe.py | python3 - install --api-base ${origin} ${h(ns)}/${h(name)}</code>
             <button class="copy-btn" type="button" onclick="copyCurl()" title="Copy curl command">
               <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             </button>
@@ -483,7 +484,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
   });
 
   // ─── Load skill metadata ───
-  fetch("/v1/skills/"+encodeURIComponent(NS)+"/"+encodeURIComponent(NAME))
+  fetch("/v1/skills/"+NS+"/"+encodeURIComponent(NAME))
     .then(function(r){return r.json()})
     .then(function(res){
       if(!res.ok){showError("Skill not found.");return}
@@ -526,7 +527,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
       document.getElementById("readme-empty").hidden=false;
       return;
     }
-    fetch("/v1/skills/"+encodeURIComponent(NS)+"/"+encodeURIComponent(NAME)+"/download/"+encodeURIComponent(latestVersion))
+    fetch("/v1/skills/"+NS+"/"+encodeURIComponent(NAME)+"/download/"+encodeURIComponent(latestVersion))
       .then(function(r){return r.json()})
       .then(function(res){
         document.getElementById("readme-loading").hidden=true;
@@ -537,7 +538,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
         var mdFile=res.data.files.find(function(f){return f.path.match(/^(SKILL|README|skill|readme)\\.(md|txt)$/i)});
         if(!mdFile){
           // Show a file listing as fallback
-          var html='<p style="color:var(--text-secondary);margin-bottom:12px">No SKILL.md or README found. See the <button class="btn-link" onclick="switchTab(\'files\')">Files tab</button> for all files.</p>';
+          var html='<p style="color:var(--text-secondary);margin-bottom:12px">No SKILL.md or README found. See the <button class="btn-link" onclick="switchTab(&apos;files&apos;)">Files tab</button> for all files.</p>';
           document.getElementById("readme-content").innerHTML=html;
           document.getElementById("readme-content").hidden=false;
           return;
@@ -567,7 +568,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
       document.getElementById("security-empty").hidden=false;
       return;
     }
-    fetch("/v1/skills/"+encodeURIComponent(NS)+"/"+encodeURIComponent(NAME)+"/versions/"+encodeURIComponent(latestVersion)+"/scan")
+    fetch("/v1/skills/"+NS+"/"+encodeURIComponent(NAME)+"/versions/"+encodeURIComponent(latestVersion)+"/scan")
       .then(function(r){return r.json()})
       .then(function(res){
         document.getElementById("security-loading").hidden=true;
@@ -645,7 +646,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
       document.getElementById("files-empty").hidden=false;
       return;
     }
-    fetch("/v1/skills/"+encodeURIComponent(NS)+"/"+encodeURIComponent(NAME)+"/download/"+encodeURIComponent(latestVersion))
+    fetch("/v1/skills/"+NS+"/"+encodeURIComponent(NAME)+"/download/"+encodeURIComponent(latestVersion))
       .then(function(r){return r.json()})
       .then(function(res){
         document.getElementById("files-loading").hidden=true;
@@ -685,7 +686,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
   var versionsLoaded=false;
   function loadVersions(){
     versionsLoaded=true;
-    fetch("/v1/skills/"+encodeURIComponent(NS)+"/"+encodeURIComponent(NAME)+"/versions")
+    fetch("/v1/skills/"+NS+"/"+encodeURIComponent(NAME)+"/versions")
       .then(function(r){return r.json()})
       .then(function(res){
         document.getElementById("versions-loading").hidden=true;
@@ -716,7 +717,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
 
   // ─── Install helpers ───
   window.copyInstall=function(){
-    window.copyText("skillsafe --api-base http://localhost:8787 install "+NS+"/"+NAME,"Install command");
+    window.copyText(document.getElementById("install-cmd").textContent,"Install command");
   };
   window.copyCurl=function(){
     window.copyText(document.getElementById("curl-cmd").textContent,"curl command");
