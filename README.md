@@ -47,8 +47,12 @@ Read requests (GET) are always open.
 
 ## Point the SkillSafe CLI at the Local Server
 
+Pass `--api-base` to any command:
+
 ```bash
-skillsafe config set registry http://localhost:8787
+skillsafe --api-base http://localhost:8787 save ./my-skill --version 1.0.0
+skillsafe --api-base http://localhost:8787 list
+skillsafe --api-base http://localhost:8787 install @ns/name
 ```
 
 ## Data Layout

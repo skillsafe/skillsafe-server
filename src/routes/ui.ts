@@ -114,7 +114,7 @@ function dashboardPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
   <div id="skills-empty" class="empty-state" hidden>
     <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
     <p>No skills saved yet. To save your first skill, run:</p>
-    <pre><code>skillsafe save ./my-skill --registry http://localhost:8787</code></pre>
+    <pre><code>skillsafe --api-base http://localhost:8787 save ./my-skill --version 1.0.0</code></pre>
   </div>
 
   <div id="skills-pagination" class="pagination-bar" hidden></div>
@@ -424,7 +424,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
         <div class="install-block">
           <p class="install-label">via CLI</p>
           <div class="copy-row">
-            <code id="install-cmd" class="install-code">skillsafe install ${h(ns)}/${h(name)}</code>
+            <code id="install-cmd" class="install-code">skillsafe --api-base http://localhost:8787 install ${h(ns)}/${h(name)}</code>
             <button class="copy-btn" type="button" onclick="copyInstall()" title="Copy install command">
               <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             </button>
@@ -716,7 +716,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
 
   // ─── Install helpers ───
   window.copyInstall=function(){
-    window.copyText("skillsafe install "+NS+"/"+NAME+" --registry http://localhost:8787","Install command");
+    window.copyText("skillsafe --api-base http://localhost:8787 install "+NS+"/"+NAME,"Install command");
   };
   window.copyCurl=function(){
     window.copyText(document.getElementById("curl-cmd").textContent,"curl command");
