@@ -6,6 +6,7 @@ import { skillRoutes } from "./routes/skills.js";
 import { blobRoutes } from "./routes/blobs.js";
 import { scanRoutes } from "./routes/scan.js";
 import { verifyRoutes } from "./routes/verify.js";
+import { uiRoutes } from "./routes/ui.js";
 const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 export function createApp(storage, token) {
     const app = new Hono();
@@ -28,7 +29,8 @@ export function createApp(storage, token) {
         console.error("Unhandled error:", err);
         return apiError(c, 500, "internal_error", err.message || "Internal server error");
     });
-    // Mount routes
+    // Mount routes — UI first so HTML pages take priority over API 404s
+    app.route("", uiRoutes());
     app.route("", utilityRoutes);
     app.route("", skillRoutes(storage));
     app.route("", blobRoutes(storage));
