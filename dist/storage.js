@@ -201,6 +201,55 @@ export class Storage {
             return null;
         }
     }
+    // --- Agents ---
+    agentDir() {
+        return join(this.dataDir, ".agents");
+    }
+    agentPath(id) {
+        return join(this.agentDir(), id + ".json");
+    }
+    async listAgents() {
+        try {
+            await mkdir(this.agentDir(), { recursive: true });
+            const entries = await readdir(this.agentDir());
+            const agents = [];
+            for (const entry of entries) {
+                if (!entry.endsWith(".json"))
+                    continue;
+                const id = entry.slice(0, -5);
+                const agent = await this.readAgent(id);
+                if (agent)
+                    agents.push(agent);
+            }
+            agents.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+            return agents;
+        }
+        catch {
+            return [];
+        }
+    }
+    async readAgent(id) {
+        try {
+            const data = await readFile(this.agentPath(id), "utf-8");
+            return JSON.parse(data);
+        }
+        catch {
+            return null;
+        }
+    }
+    async writeAgent(id, data) {
+        await mkdir(this.agentDir(), { recursive: true });
+        await writeFile(this.agentPath(id), JSON.stringify(data, null, 2));
+    }
+    async deleteAgent(id) {
+        try {
+            await rm(this.agentPath(id));
+            return true;
+        }
+        catch {
+            return false;
+        }
+    }
     // --- Yank ---
     async yankVersion(ns, name, version) {
         const manifest = await this.readManifest(ns, name, version);

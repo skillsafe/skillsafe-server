@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { apiError } from "./lib/response.js";
 import { utilityRoutes } from "./routes/utility.js";
 import { skillRoutes } from "./routes/skills.js";
+import { agentRoutes } from "./routes/agents.js";
 import { blobRoutes } from "./routes/blobs.js";
 import { scanRoutes } from "./routes/scan.js";
 import { verifyRoutes } from "./routes/verify.js";
@@ -39,6 +40,7 @@ export function createApp(storage: Storage, token: string | null): Hono {
   app.route("", uiRoutes());
   app.route("", utilityRoutes);
   app.route("", skillRoutes(storage));
+  app.route("", agentRoutes(storage));
   app.route("", blobRoutes(storage));
   app.route("", scanRoutes(storage));
   app.route("", verifyRoutes(storage));

@@ -24,233 +24,215 @@ function uiRoutes() {
   return app;
 }
 function dashboardPage(c) {
-  const path = new URL(c.req.url).pathname;
+  const url = new URL(c.req.url);
+  const origin = url.origin;
+  const path = url.pathname;
   return baseHtml({
-    title: "Skills \u2014 SkillSafe Local",
+    title: "Dashboard \u2014 SkillSafe Local",
     path,
-    css: EXPLORE_CSS,
+    css: DASH_CSS,
     body: `
-<div class="container explore-page">
-  <div class="explore-header animate-in">
-    <div class="explore-title-row">
-      <div>
-        <h1>Local Skills</h1>
-        <p class="explore-subtitle">Skills saved to your local registry.</p>
+<div class="container dash-page">
+  <!-- Header -->
+  <div class="dash-header animate-in">
+    <div class="dash-greeting">
+      <h1 class="dash-title">Dashboard</h1>
+      <p>Local registry \u2014 data stays on your machine.</p>
+    </div>
+    <div class="dash-header-stats">
+      <div class="header-stat">
+        <span class="header-stat-value" id="stat-agent-count">\u2014</span>
+        <span class="header-stat-label">Agents</span>
       </div>
-      <div class="view-toggle" role="group" aria-label="View options">
-        <button id="view-grid" class="view-btn active" type="button" aria-label="Grid view" title="Grid view" aria-pressed="true">
-          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        </button>
-        <button id="view-list" class="view-btn" type="button" aria-label="List view" title="List view" aria-pressed="false">
-          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
-        </button>
+      <span class="header-stat-sep"></span>
+      <div class="header-stat">
+        <span class="header-stat-value" id="stat-skill-count">\u2014</span>
+        <span class="header-stat-label">Skills</span>
       </div>
     </div>
+  </div>
 
-    <div class="filter-bar animate-in stagger-1">
-      <div class="search-inline" role="search">
-        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input id="explore-search" class="input" type="text" placeholder="Search skills..." aria-label="Search skills" />
-        <kbd class="search-kbd" aria-hidden="true">/</kbd>
-      </div>
-      <div class="filter-group">
-        <select id="category-filter" class="select-input" aria-label="Filter by category">
-          <option value="">All Categories</option>
-          <option value="productivity">Productivity</option>
-          <option value="react-nextjs">React &amp; Next.js</option>
-          <option value="design">Design</option>
-          <option value="ai-ml">AI / ML</option>
-          <option value="content-media">Content &amp; Media</option>
-          <option value="browser-web">Browser &amp; Web</option>
-          <option value="testing">Testing &amp; QA</option>
-          <option value="marketing">Marketing</option>
-          <option value="backend-database">Backend &amp; Database</option>
-          <option value="mobile">Mobile</option>
-          <option value="vue">Vue</option>
-          <option value="devops">DevOps</option>
-        </select>
-        <select id="sort-filter" class="select-input" aria-label="Sort skills by">
-          <option value="updated">Recently Updated</option>
+  <!-- Agents -->
+  <div class="agents-section animate-in stagger-2">
+    <div class="section-header">
+      <h2>
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14H8a4 4 0 0 0-4 4v2h16v-2a4 4 0 0 0-4-4z"/></svg>
+        Your Agents
+      </h2>
+    </div>
+    <div id="agents-list" class="agents-grid">
+      <div class="skeleton" style="height:64px;border-radius:var(--radius)"></div>
+      <div class="skeleton" style="height:64px;border-radius:var(--radius)"></div>
+    </div>
+    <div id="agents-empty" class="agents-empty-state" hidden>
+      <svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14H8a4 4 0 0 0-4 4v2h16v-2a4 4 0 0 0-4-4z"/></svg>
+      <p>Back up your AI agent's identity and memory. Send this to your AI:</p>
+      <pre><code>/skillsafe agent save</code></pre>
+    </div>
+  </div>
+
+  <!-- Skills -->
+  <div class="my-skills animate-in stagger-3">
+    <div class="section-header">
+      <h2>
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Your Skills
+      </h2>
+      <div class="toolbar-right">
+        <div class="skills-search-wrap">
+          <svg class="skills-search-icon" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="skills-search" class="input input-sm skills-search-input" type="text" placeholder="Filter skills..." aria-label="Filter skills" />
+        </div>
+        <select id="skills-sort" class="input input-sm skills-sort-select" aria-label="Sort skills">
+          <option value="updated">Recent</option>
           <option value="name">Name A\u2013Z</option>
         </select>
       </div>
     </div>
+    <div id="my-skills-list" class="my-skills-list" aria-busy="true">
+      <div class="skeleton" style="height:64px;margin-bottom:8px;border-radius:var(--radius)"></div>
+      <div class="skeleton" style="height:64px;margin-bottom:8px;border-radius:var(--radius)"></div>
+      <div class="skeleton" style="height:64px;border-radius:var(--radius)"></div>
+    </div>
+    <div id="my-skills-pagination" class="pagination-bar" hidden></div>
+    <div id="my-skills-empty" class="empty-state" hidden>
+      <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <p>No skills saved yet. To save your first skill, run:</p>
+      <pre><code>skillsafe --api-base ${origin} save ./my-skill --version 1.0.0</code></pre>
+    </div>
   </div>
-
-  <div id="skills-status" class="visually-hidden" aria-live="polite" role="status"></div>
-
-  <div id="skills-grid" class="skills-grid animate-in stagger-2" aria-busy="true">
-    <div class="skeleton" style="height:160px;border-radius:var(--radius)"></div>
-    <div class="skeleton" style="height:160px;border-radius:var(--radius)"></div>
-    <div class="skeleton" style="height:160px;border-radius:var(--radius)"></div>
-    <div class="skeleton" style="height:160px;border-radius:var(--radius)"></div>
-  </div>
-
-  <div id="skills-empty" class="empty-state" hidden>
-    <svg aria-hidden="true" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-    <p>No skills saved yet. To save your first skill, run:</p>
-    <pre><code>skillsafe --api-base http://localhost:8787 save ./my-skill --version 1.0.0</code></pre>
-  </div>
-
-  <div id="skills-pagination" class="pagination-bar" hidden></div>
 </div>`,
     scripts: `<script>
 (function(){
-  var allSkills=[];
-  var page=1;
-  var perPage=20;
-  var viewMode="grid";
+  function hEsc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 
-  function getFilters(){
-    return{
-      q:(document.getElementById("explore-search").value||"").toLowerCase().trim(),
-      cat:document.getElementById("category-filter").value,
-      sort:document.getElementById("sort-filter").value,
-    };
+  function timeAgo(iso){
+    if(!iso)return "";
+    var diff=Date.now()-new Date(iso).getTime();
+    var m=Math.floor(diff/60000);
+    if(m<1)return "just now";
+    if(m<60)return m+"m ago";
+    var h=Math.floor(m/60);
+    if(h<24)return h+"h ago";
+    var d=Math.floor(h/24);
+    if(d<30)return d+"d ago";
+    return new Date(iso).toLocaleDateString();
   }
 
-  function filterSkills(skills,f){
-    var r=skills.slice();
-    if(f.q){
-      r=r.filter(function(s){
-        return (s.namespace+"").toLowerCase().includes(f.q)||
-          (s.name+"").toLowerCase().includes(f.q)||
-          (s.description+"").toLowerCase().includes(f.q)||
-          (s.tags||[]).some(function(t){return t.toLowerCase().includes(f.q)});
-      });
-    }
-    if(f.cat)r=r.filter(function(s){return s.category===f.cat});
-    if(f.sort==="name")r.sort(function(a,b){return(a.name||"").localeCompare(b.name||"")});
-    return r;
-  }
+  // \u2500\u2500\u2500 Agents \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  var platformColors={claude:"var(--accent)",openclaw:"var(--green)",cursor:"var(--amber)",windsurf:"#06b6d4",cline:"#a78bfa"};
 
-  function scanBadge(hasScan){
-    if(hasScan===null||hasScan===undefined)return "";
-    return hasScan
-      ? '<span class="badge badge-green"><svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>Scan safe</span>'
-      : '<span class="badge badge-neutral">No scan</span>';
-  }
-
-  function renderCard(s){
-    var ns=h(s.namespace||"");
-    var name=h(s.name||"");
-    var href="/skill/"+(s.namespace||"")+"/"+(s.name||"");
-    var desc=h(s.description||"No description.");
-    var ver=h(s.latest_version||"\u2014");
-    var cat=s.category?'<span class="badge badge-neutral">'+h(s.category)+'</span>':"";
-    var tags=(s.tags||[]).slice(0,3).map(function(t){return'<span class="skill-tag">'+h(t)+'</span>'}).join("");
-    if(viewMode==="list"){
-      return '<a href="'+href+'" class="skill-card-list card card-hover">'
-        +'<div class="skill-card-list-icon"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>'
-        +'<div class="skill-card-list-body">'
-        +'<div class="skill-card-list-title"><span class="skill-ns">'+ns+'</span><span class="skill-sep">/</span><span class="skill-n">'+name+'</span></div>'
-        +'<p class="skill-desc-text">'+desc+'</p>'
-        +'</div>'
-        +'<div class="skill-card-list-meta">'+cat+' <span class="skill-ver">v'+ver+'</span></div>'
-        +'</a>';
-    }
-    return '<a href="'+href+'" class="skill-card card card-hover card-interactive">'
-      +'<div class="skill-card-header">'
-      +'<div class="skill-card-icon"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>'
-      +'<div class="skill-card-name"><span class="skill-ns">'+ns+'</span><span class="skill-sep">/</span><span class="skill-n">'+name+'</span></div>'
+  function renderAgentCard(a){
+    var color=platformColors[a.platform]||"var(--text-secondary)";
+    return '<a href="/agent/'+hEsc(a.id)+'/" class="agent-card card card-interactive">'
+      +'<div class="agent-card-icon" style="background:'+color+'15;color:'+color+'">'
+      +'<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14H8a4 4 0 0 0-4 4v2h16v-2a4 4 0 0 0-4-4z"/></svg>'
       +'</div>'
-      +'<p class="skill-card-desc">'+desc+'</p>'
-      +'<div class="skill-card-footer">'
-      +'<span class="skill-ver">v'+ver+'</span>'
-      +cat
+      +'<div class="agent-card-info">'
+      +'<span class="agent-card-name">'+hEsc(a.name)+'</span>'
+      +'<span class="agent-card-meta">'+hEsc(a.platform)+' \xB7 '+timeAgo(a.updated_at||a.created_at)+'</span>'
       +'</div>'
-      +(tags?'<div class="skill-tags">'+tags+'</div>':"")
+      +'<span class="badge badge-neutral badge-sm">'+hEsc(a.platform)+'</span>'
+      +'<svg class="agent-card-arrow" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>'
       +'</a>';
   }
 
-  function h(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+  fetch("/v1/agents")
+    .then(function(r){return r.json()})
+    .then(function(res){
+      var list=document.getElementById("agents-list");
+      var empty=document.getElementById("agents-empty");
+      var agents=res.data||[];
+      document.getElementById("stat-agent-count").textContent=String(agents.length);
+      if(agents.length===0){
+        list.innerHTML="";
+        empty.hidden=false;
+        return;
+      }
+      list.innerHTML=agents.map(renderAgentCard).join("");
+    })
+    .catch(function(){
+      document.getElementById("agents-list").innerHTML="";
+      document.getElementById("agents-empty").hidden=false;
+      document.getElementById("stat-agent-count").textContent="0";
+    });
 
-  function render(){
-    var f=getFilters();
-    var filtered=filterSkills(allSkills,f);
-    var start=(page-1)*perPage;
-    var slice=filtered.slice(start,start+perPage);
-    var grid=document.getElementById("skills-grid");
-    var empty=document.getElementById("skills-empty");
-    var status=document.getElementById("skills-status");
-    var pagEl=document.getElementById("skills-pagination");
+  // \u2500\u2500\u2500 Skills \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  var allSkills=[];
+  var skillsPage=0;
+  var SKILLS_PER_PAGE=20;
 
-    grid.setAttribute("aria-busy","false");
-    if(viewMode==="list"){
-      grid.className="skills-list";
-    } else {
-      grid.className="skills-grid animate-in stagger-2";
-    }
-
-    if(filtered.length===0){
-      grid.innerHTML="";
-      empty.hidden=false;
-      pagEl.hidden=true;
-      status.textContent="No skills found";
-      return;
-    }
-    empty.hidden=true;
-    status.textContent=filtered.length+" skill"+(filtered.length===1?"":"s");
-    grid.innerHTML=slice.map(renderCard).join("");
-
-    // Pagination
-    var totalPages=Math.ceil(filtered.length/perPage);
-    if(totalPages>1){
-      var btns="";
-      if(page>1)btns+='<button class="btn btn-secondary btn-sm" onclick="changePage('+(page-1)+')">\u2190 Prev</button>';
-      btns+='<span class="page-info">Page '+page+' of '+totalPages+'</span>';
-      if(page<totalPages)btns+='<button class="btn btn-secondary btn-sm" onclick="changePage('+(page+1)+')">Next \u2192</button>';
-      pagEl.innerHTML=btns;
-      pagEl.hidden=false;
-    } else {
-      pagEl.hidden=true;
-    }
+  function renderSkillRow(s){
+    var ns=hEsc(s.namespace||"");
+    var name=hEsc(s.name||"");
+    var href="/skill/"+(s.namespace||"")+"/"+(s.name||"");
+    var desc=hEsc(s.description||"");
+    var ver=hEsc(s.latest_version||"\u2014");
+    var cat=s.category?'<span class="badge badge-neutral badge-sm">'+hEsc(s.category)+'</span>':"";
+    return '<a href="'+href+'" class="my-skill-item card card-interactive">'
+      +'<div class="my-skill-left">'
+      +'<div class="my-skill-icon"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>'
+      +'<div class="my-skill-info">'
+      +'<div class="my-skill-name"><span class="ns">'+ns+'</span>/<strong>'+name+'</strong>'
+      +' <span class="version-tag">'+ver+'</span></div>'
+      +(desc?'<span class="my-skill-desc">'+desc+'</span>':"")
+      +'</div>'
+      +'</div>'
+      +'<div class="my-skill-right">'+cat
+      +'<span class="my-skill-time">'+timeAgo(s.updated_at)+'</span>'
+      +'</div>'
+      +'</a>';
   }
 
-  window.changePage=function(p){page=p;render();window.scrollTo({top:0,behavior:"smooth"})};
+  function applySkillFilters(reset){
+    var q=(document.getElementById("skills-search").value||"").toLowerCase().trim();
+    var sort=document.getElementById("skills-sort").value;
+    var filtered=allSkills.slice();
+    if(q)filtered=filtered.filter(function(s){
+      return (s.namespace+"").toLowerCase().includes(q)||(s.name+"").toLowerCase().includes(q)||(s.description+"").toLowerCase().includes(q);
+    });
+    if(sort==="name")filtered.sort(function(a,b){return(a.name||"").localeCompare(b.name||"")});
+    if(reset)skillsPage=0;
+    renderSkillsPage(filtered);
+  }
 
-  // Load skills
-  fetch("/v1/skills?limit=200")
+  function renderSkillsPage(filtered){
+    var list=document.getElementById("my-skills-list");
+    var empty=document.getElementById("my-skills-empty");
+    var pagEl=document.getElementById("my-skills-pagination");
+    list.setAttribute("aria-busy","false");
+    if(filtered.length===0){list.innerHTML="";empty.hidden=false;pagEl.hidden=true;return;}
+    empty.hidden=true;
+    var start=skillsPage*SKILLS_PER_PAGE;
+    var slice=filtered.slice(start,start+SKILLS_PER_PAGE);
+    list.innerHTML=slice.map(renderSkillRow).join("");
+    var totalPages=Math.ceil(filtered.length/SKILLS_PER_PAGE);
+    if(totalPages>1){
+      var btns="";
+      if(skillsPage>0)btns+='<button class="btn btn-secondary btn-sm" id="sp-prev">\u2190 Prev</button>';
+      btns+='<span class="page-info">Page '+(skillsPage+1)+' of '+totalPages+'</span>';
+      if(skillsPage<totalPages-1)btns+='<button class="btn btn-secondary btn-sm" id="sp-next">Next \u2192</button>';
+      pagEl.innerHTML=btns;pagEl.hidden=false;
+      if(document.getElementById("sp-prev"))document.getElementById("sp-prev").addEventListener("click",function(){skillsPage--;applySkillFilters(false);window.scrollTo({top:0,behavior:"smooth"});});
+      if(document.getElementById("sp-next"))document.getElementById("sp-next").addEventListener("click",function(){skillsPage++;applySkillFilters(false);window.scrollTo({top:0,behavior:"smooth"});});
+    } else {pagEl.hidden=true;}
+  }
+
+  fetch("/v1/skills?limit=500")
     .then(function(r){return r.json()})
     .then(function(res){
       allSkills=res.data||[];
-      render();
+      document.getElementById("stat-skill-count").textContent=String(allSkills.length);
+      applySkillFilters(true);
     })
     .catch(function(){
-      var grid=document.getElementById("skills-grid");
-      grid.innerHTML='<p style="color:var(--red);grid-column:1/-1">Failed to load skills. Is the server running?</p>';
-      grid.setAttribute("aria-busy","false");
+      document.getElementById("my-skills-list").innerHTML='<p style="color:var(--red);padding:20px">Failed to load skills.</p>';
+      document.getElementById("my-skills-list").setAttribute("aria-busy","false");
+      document.getElementById("stat-skill-count").textContent="0";
     });
 
-  // Filter listeners
-  document.getElementById("explore-search").addEventListener("input",function(){page=1;render()});
-  document.getElementById("category-filter").addEventListener("change",function(){page=1;render()});
-  document.getElementById("sort-filter").addEventListener("change",function(){page=1;render()});
-
-  // Keyboard shortcut: / to focus search
-  document.addEventListener("keydown",function(e){
-    if(e.key==="/"&&document.activeElement.tagName!=="INPUT"&&document.activeElement.tagName!=="TEXTAREA"){
-      e.preventDefault();document.getElementById("explore-search").focus();
-    }
-  });
-
-  // View toggle
-  document.getElementById("view-grid").addEventListener("click",function(){
-    viewMode="grid";
-    document.getElementById("view-grid").classList.add("active");
-    document.getElementById("view-list").classList.remove("active");
-    document.getElementById("view-grid").setAttribute("aria-pressed","true");
-    document.getElementById("view-list").setAttribute("aria-pressed","false");
-    render();
-  });
-  document.getElementById("view-list").addEventListener("click",function(){
-    viewMode="list";
-    document.getElementById("view-list").classList.add("active");
-    document.getElementById("view-grid").classList.remove("active");
-    document.getElementById("view-list").setAttribute("aria-pressed","true");
-    document.getElementById("view-grid").setAttribute("aria-pressed","false");
-    render();
-  });
+  document.getElementById("skills-search").addEventListener("input",function(){applySkillFilters(true)});
+  document.getElementById("skills-sort").addEventListener("change",function(){applySkillFilters(true)});
 })();
 </script>`
   });
@@ -697,56 +679,72 @@ function skillDetailPage(c) {
 </script>`
   });
 }
-const EXPLORE_CSS = `
-.explore-page { padding-top: 40px; padding-bottom: 80px; }
-.explore-header { margin-bottom: 24px; }
-.explore-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
-.explore-title-row h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.02em; }
-.explore-subtitle { color: var(--text-secondary); font-size: .95rem; margin-top: 4px; }
-.filter-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-.search-inline { position: relative; flex: 1; min-width: 220px; display: flex; align-items: center; }
-.search-inline svg { position: absolute; left: 12px; color: var(--text-tertiary); pointer-events: none; }
-.search-inline .input { padding-left: 38px; padding-right: 40px; }
-.search-kbd { position: absolute; right: 10px; padding: 1px 6px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; font-family: var(--font-mono); font-size: .7rem; color: var(--text-tertiary); }
-.filter-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.view-toggle { display: flex; gap: 4px; }
-.view-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-tertiary); cursor: pointer; transition: all var(--transition); }
-.view-btn:hover { border-color: var(--border-hover); color: var(--text-secondary); }
-.view-btn.active { background: var(--accent-muted); border-color: var(--accent); color: var(--accent-fg); }
-.skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 8px; }
-.skills-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-.skill-card { display: flex; flex-direction: column; gap: 10px; padding: 16px; text-decoration: none; color: var(--text); }
-.skill-card:hover { text-decoration: none; color: var(--text); }
-.skill-card-header { display: flex; align-items: center; gap: 10px; }
-.skill-card-icon { width: 34px; height: 34px; background: var(--accent-muted); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: var(--accent-fg); flex-shrink: 0; }
-.skill-card-name { font-weight: 600; font-size: .95rem; word-break: break-word; }
-.skill-ns { color: var(--text-secondary); }
-.skill-sep { color: var(--border-hover); margin: 0 1px; }
-.skill-n { color: var(--text); }
-.skill-card-desc { font-size: .82rem; color: var(--text-secondary); flex: 1; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.skill-card-footer { display: flex; align-items: center; gap: 8px; margin-top: auto; }
-.skill-ver { font-family: var(--font-mono); font-size: .75rem; color: var(--text-tertiary); }
-.skill-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-.skill-tag { display: inline-block; padding: 1px 7px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 20px; font-size: .72rem; color: var(--text-tertiary); text-decoration: none; }
-.skill-tag:hover { border-color: var(--accent); color: var(--accent-fg); }
-/* List view */
-.skill-card-list { display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none; color: var(--text); }
-.skill-card-list:hover { text-decoration: none; color: var(--text); }
-.skill-card-list-icon { width: 30px; height: 30px; background: var(--accent-muted); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: var(--accent-fg); flex-shrink: 0; }
-.skill-card-list-body { flex: 1; min-width: 0; }
-.skill-card-list-title { font-weight: 600; font-size: .9rem; }
-.skill-desc-text { font-size: .8rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.skill-card-list-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+const DASH_CSS = `
+/* \u2500\u2500 Dashboard layout \u2500\u2500 */
+.dash-page { padding: 32px 24px 80px; }
+.dash-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 36px; gap: 24px; flex-wrap: wrap; }
+.dash-title { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; }
+.dash-greeting p { color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
+/* Stats */
+.dash-header-stats { display: flex; align-items: center; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.header-stat { display: flex; flex-direction: column; align-items: center; padding: 10px 20px; min-width: 72px; }
+.header-stat-value { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+.header-stat-label { font-size: 0.7rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.03em; font-weight: 500; }
+.header-stat-sep { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+/* Section header */
+.section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+.section-header h2 { display: flex; align-items: center; gap: 7px; font-size: 1.05rem; font-weight: 700; white-space: nowrap; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.input-sm { padding: 5px 10px; font-size: 0.82rem; }
+.skills-sort-select { width: auto; min-width: 0; appearance: auto; }
+.skills-search-wrap { position: relative; display: flex; align-items: center; }
+.skills-search-icon { position: absolute; left: 8px; color: var(--text-tertiary); pointer-events: none; }
+.skills-search-input { padding-left: 28px !important; width: 150px; }
+/* Agents */
+.agents-section { margin-bottom: 36px; }
+.agents-grid { display: flex; flex-direction: column; gap: 8px; }
+.agent-card { display: flex; align-items: center; gap: 12px; padding: 14px 18px; text-decoration: none; color: var(--text); transition: border-color var(--transition); }
+.agent-card:hover { text-decoration: none; border-color: var(--accent); }
+.agent-card-icon { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; }
+.agent-card-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.agent-card-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agent-card-meta { font-size: 0.78rem; color: var(--text-tertiary); }
+.agent-card-arrow { color: var(--text-tertiary); flex-shrink: 0; }
+.agents-empty-state { padding: 2rem 1.5rem; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius); background: var(--bg-surface); }
+.agents-empty-state p { color: var(--text-secondary); margin: 0.75rem 0; font-size: 0.9rem; }
+.agents-empty-state pre { display: inline-block; margin: 0; padding: 0.5rem 1rem; background: var(--bg-elevated); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.8rem; }
+/* Skills list */
+.my-skills { margin-bottom: 40px; }
+.my-skills-list { display: flex; flex-direction: column; gap: 8px; }
+.my-skill-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; text-decoration: none; color: var(--text); gap: 16px; transition: border-color var(--transition); }
+.my-skill-item:hover { text-decoration: none; border-color: var(--accent); }
+.my-skill-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+.my-skill-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--accent-muted); color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.my-skill-info { min-width: 0; flex: 1; }
+.my-skill-name { font-size: 0.9rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 2px; }
+.my-skill-name .ns { color: var(--text-tertiary); font-weight: 400; }
+.my-skill-desc { font-size: 0.78rem; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 400px; }
+.my-skill-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.my-skill-time { font-size: 0.72rem; color: var(--text-tertiary); white-space: nowrap; }
+.version-tag { font-size: 0.7rem; padding: 1px 6px; background: var(--code-bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text-secondary); font-family: var(--font-mono); }
 /* Empty / pagination */
-.empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 60px 20px; color: var(--text-secondary); text-align: center; }
-.empty-state pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 16px; font-size: .85rem; }
-.pagination-bar { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px 20px; color: var(--text-secondary); text-align: center; }
+.empty-state p { margin: 0; font-size: 0.9rem; }
+.empty-state pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 16px; font-size: .82rem; margin-top: 4px; }
+.pagination-bar { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
 .page-info { color: var(--text-secondary); font-size: .875rem; }
-@media (max-width:768px){
-  .explore-title-row { flex-wrap: wrap; }
-  .filter-bar { flex-direction: column; align-items: stretch; }
-  .filter-group { flex-wrap: wrap; }
-  .skills-grid { grid-template-columns: 1fr; }
+.badge-sm { font-size: 0.7rem !important; padding: 1px 6px !important; }
+@media (max-width: 768px) {
+  .dash-page { padding: 20px 16px 60px; }
+  .dash-header { margin-bottom: 24px; }
+  .toolbar-right { flex-wrap: wrap; }
+  .skills-search-input { width: 120px; }
+  .my-skill-desc { max-width: 200px; }
+}
+@media (max-width: 375px) {
+  .dash-header-stats { flex-wrap: wrap; }
+  .header-stat { flex: 1 1 40%; padding: 6px 10px; }
+  .header-stat-sep { display: none; }
 }
 `;
 const SKILL_CSS = `
