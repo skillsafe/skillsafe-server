@@ -37,7 +37,7 @@ export function createApp(storage: Storage, token: string | null): Hono {
   });
 
   // Mount routes — UI first so HTML pages take priority over API 404s
-  app.route("", uiRoutes());
+  app.route("", uiRoutes(storage.dataDir));
   app.route("", utilityRoutes);
   app.route("", skillRoutes(storage));
   app.route("", agentRoutes(storage));

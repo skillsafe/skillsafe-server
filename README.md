@@ -12,13 +12,13 @@ A local skill registry server for the [SkillSafe CLI](https://github.com/skillsa
 node dist/index.js
 ```
 
-The server starts on `http://localhost:8787` by default, storing data in `~/.skillsafe-local/data`.
+The server starts on `http://localhost:9876` by default, storing data in `./data`.
 
 ## Options
 
 ```
---port <number>     Port to listen on          (default: 8787)
---data <path>       Data directory             (default: ~/.skillsafe-local/data)
+--port <number>     Port to listen on          (default: 9876)
+--data <path>       Data directory             (default: ./data)
 --token <string>    Require token for writes   (default: none — open)
 --max-size <bytes>  Max request body size      (default: 52428800 = 50 MB)
 --help              Show help
@@ -27,7 +27,7 @@ The server starts on `http://localhost:8787` by default, storing data in `~/.ski
 ### Examples
 
 ```bash
-# Default — open server on port 8787
+# Default — open server on port 9876
 node dist/index.js
 
 # Custom port and data directory
@@ -50,15 +50,15 @@ Read requests (GET) are always open.
 Pass `--api-base` to any command:
 
 ```bash
-skillsafe --api-base http://localhost:8787 save ./my-skill --version 1.0.0
-skillsafe --api-base http://localhost:8787 list
-skillsafe --api-base http://localhost:8787 install @ns/name
+skillsafe --api-base http://localhost:9876 save ./my-skill
+skillsafe --api-base http://localhost:9876 list
+skillsafe --api-base http://localhost:9876 install @ns/name
 ```
 
 ## Data Layout
 
 ```
-~/.skillsafe-local/data/
+./data/
   @namespace/
     skill-name/
       skill.json              # Skill metadata
@@ -68,6 +68,9 @@ skillsafe --api-base http://localhost:8787 install @ns/name
           scan_report.json    # Scan report (if uploaded)
           verification.json   # Verification result (if run)
           files/              # Symlinks (or copies) into .blobs/
+  .agents/
+    agt_xxxxx/
+      agent.json              # Agent metadata
   .blobs/
     <xx>/
       <sha256-hex>            # Content-addressed blob store
@@ -77,7 +80,8 @@ skillsafe --api-base http://localhost:8787 install @ns/name
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Health check |
+| GET | `/dashboard` | Web UI dashboard |
+| GET | `/` | Redirect to dashboard |
 | GET | `/v1/skills` | List all skills |
 | GET | `/v1/skills/@ns/name` | Get skill metadata |
 | POST | `/v1/skills/@ns/name` | Save a skill version |
@@ -90,3 +94,7 @@ skillsafe --api-base http://localhost:8787 install @ns/name
 | POST | `/v1/skills/@ns/name/versions/:ver/verify` | Run verification |
 | GET | `/v1/skills/@ns/name/versions/:ver/verify` | Get verification result |
 | POST | `/v1/skills/@ns/name/versions/:ver/yank` | Yank a version |
+| POST | `/v1/agents` | Create agent |
+| GET | `/v1/agents` | List agents |
+| PATCH | `/v1/agents/:id` | Update agent |
+| DELETE | `/v1/agents/:id` | Delete agent |

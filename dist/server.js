@@ -26,7 +26,7 @@ function createApp(storage, token) {
     console.error("Unhandled error:", err);
     return apiError(c, 500, "internal_error", err.message || "Internal server error");
   });
-  app.route("", uiRoutes());
+  app.route("", uiRoutes(storage.dataDir));
   app.route("", utilityRoutes);
   app.route("", skillRoutes(storage));
   app.route("", agentRoutes(storage));

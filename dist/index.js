@@ -6,8 +6,8 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 function parseArgs(args) {
     const opts = {
-        port: 8787,
-        dataDir: join(homedir(), ".skillsafe-local", "data"),
+        port: 9876,
+        dataDir: join(process.cwd(), "data"),
         token: null,
         maxSize: 50 * 1024 * 1024,
     };
@@ -32,8 +32,8 @@ skillsafe-local — Local skill registry for SkillSafe CLI
 Usage: skillsafe-local [options]
 
 Options:
-  --port <number>     Port to listen on (default: 8787)
-  --data <path>       Data directory (default: ~/.skillsafe-local/data)
+  --port <number>     Port to listen on (default: 9876)
+  --data <path>       Data directory (default: ./data)
   --token <string>    Require this token for write operations
   --max-size <bytes>  Max request body size (default: 52428800)
   --help              Show this help

@@ -138,6 +138,8 @@ export function skillRoutes(storage) {
         const versions = await storage.listVersions(ns, name);
         return ok(c, {
             ...meta,
+            // Normalize tags: local storage uses array, but UI code expects comma-separated string
+            tags: Array.isArray(meta.tags) ? meta.tags.join(",") : (meta.tags || ""),
             latest_version: latestVersion,
             version_count: versions.length,
             visibility: "private",
@@ -238,6 +240,75 @@ export function skillRoutes(storage) {
         if (!yanked)
             return apiError(c, 404, "not_found", "Version not found");
         return ok(c, { namespace: ns, name, version, yanked: true });
+    });
+    // Get specific version details (used by skill detail page for Files/Security/BOM tabs)
+    app.get("/v1/skills/@:ns/:name/versions/:version", async (c) => {
+        const p = parseSkillPath(c.req.path);
+        if (!p)
+            return apiError(c, 400, "invalid_request", "Invalid skill path");
+        const { ns, name, rest } = p;
+        // rest = "versions/1.0.0"
+        const versionMatch = rest.match(/^versions\/([^/]+)$/);
+        const version = versionMatch ? versionMatch[1] : c.req.param("version");
+        const manifest = await storage.readManifest(ns, name, version);
+        if (!manifest)
+            return apiError(c, 404, "not_found", "Version not found");
+        const scanReport = await storage.readScanReport(ns, name, version);
+        // Normalize file fields: local storage uses {path,hash,size}
+        // but the UI code expects {file_path,file_hash,file_size_bytes}
+        const normalizedFiles = (manifest.files || []).map(f => ({
+            file_path: f.path,
+            file_hash: f.hash,
+            file_size_bytes: f.size,
+        }));
+        return ok(c, {
+            ...manifest,
+            files: normalizedFiles,
+            scan_reports: scanReport ? [{ report_type: "publisher", ...scanReport }] : [],
+            verifications: [],
+        });
+    });
+    // README — serve SKILL.md (or first .md file) as plain text
+    app.get("/v1/skills/@:ns/:name/readme", async (c) => {
+        const p = parseSkillPath(c.req.path);
+        if (!p)
+            return apiError(c, 400, "invalid_request", "Invalid skill path");
+        const { ns, name } = p;
+        const latestVer = await storage.latestVersion(ns, name);
+        if (!latestVer)
+            return apiError(c, 404, "not_found", "No versions found");
+        const manifest = await storage.readManifest(ns, name, latestVer);
+        if (!manifest)
+            return apiError(c, 404, "not_found", "Manifest not found");
+        // Try SKILL.md, README.md, then first .md file
+        const mdFiles = manifest.files
+            .map(f => f.path)
+            .filter(p => p.toLowerCase().endsWith(".md"));
+        const preferred = ["SKILL.md", "README.md", "skill.md", "readme.md"];
+        const target = preferred.find(n => mdFiles.includes(n)) || mdFiles[0];
+        if (!target)
+            return apiError(c, 404, "not_found", "No README found");
+        const content = await storage.readVersionFile(ns, name, latestVer, target);
+        if (!content)
+            return apiError(c, 404, "not_found", "README not found");
+        c.header("Content-Type", "text/plain; charset=utf-8");
+        return c.body(content);
+    });
+    // Stubs for endpoints used by skill detail page (return empty data)
+    app.get("/v1/skills/@:ns/:name/related", async (c) => ok(c, [], { pagination: { has_more: false } }));
+    app.get("/v1/skills/@:ns/:name/eval", async (c) => ok(c, null));
+    app.get("/v1/skills/@:ns/:name/arenas", async (c) => ok(c, [], { pagination: { has_more: false } }));
+    app.get("/v1/skills/@:ns/:name/children", async (c) => ok(c, [], { pagination: { has_more: false } }));
+    // Delete skill
+    app.delete("/v1/skills/@:ns/:name", async (c) => {
+        const p = parseSkillPath(c.req.path);
+        if (!p)
+            return apiError(c, 400, "invalid_request", "Invalid skill path");
+        const { ns, name } = p;
+        const deleted = await storage.deleteSkill(ns, name);
+        if (!deleted)
+            return apiError(c, 404, "not_found", "Skill not found");
+        return ok(c, { deleted: true });
     });
     return app;
 }

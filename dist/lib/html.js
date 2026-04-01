@@ -306,9 +306,8 @@ html.theme-transitioning,html.theme-transitioning *,html.theme-transitioning *::
 }
 `;
 function baseHtml(opts) {
-  const { title, path, head = "", css = "", body, scripts = "" } = opts;
-  const isSkills = path === "/" || path.startsWith("/skills");
-  const isSkill = path.startsWith("/skill/");
+  const { title, path, head = "", css = "", body, scripts = "", dataDir = "" } = opts;
+  const isDashboard = path === "/" || path === "/dashboard" || path.startsWith("/skill/") || path.startsWith("/agent/");
   const year = (/* @__PURE__ */ new Date()).getFullYear();
   const html = `<!doctype html>
 <html lang="en">
@@ -317,6 +316,7 @@ function baseHtml(opts) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
   <title>${h(title)}</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -341,8 +341,7 @@ function baseHtml(opts) {
           <span>SkillSafe</span>
         </a>
         <div id="nav-links" class="nav-links">
-          <a href="/skills" class="nav-link${isSkills ? " active" : ""}">Skills</a>
-          <a href="https://skillsafe.ai/docs/" class="nav-link" target="_blank" rel="noopener noreferrer">Docs</a>
+          <a href="/dashboard" class="nav-link${isDashboard ? " active" : ""}">Dashboard</a>
         </div>
         <button id="mobile-menu-btn" class="mobile-menu-btn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links">
           <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -374,12 +373,10 @@ function baseHtml(opts) {
           </svg>
           SkillSafe Local
         </a>
-        <p class="footer-tagline">Local skill registry \u2014 data stays on your machine.</p>
         <span class="footer-copy">&copy; ${year} SkillSafe</span>
       </div>
       <nav aria-label="Footer navigation">
         <div class="footer-links">
-          <a href="/skills">Skills</a>
           <a href="https://skillsafe.ai/docs/" target="_blank" rel="noopener noreferrer">Docs</a>
           <a href="https://skillsafe.ai/" target="_blank" rel="noopener noreferrer">skillsafe.ai</a>
           <a href="https://github.com/skillsafe/skillsafe-cli" target="_blank" rel="noopener noreferrer">CLI</a>

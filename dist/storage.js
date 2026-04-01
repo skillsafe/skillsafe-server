@@ -250,6 +250,16 @@ export class Storage {
             return false;
         }
     }
+    // --- Delete Skill ---
+    async deleteSkill(ns, name) {
+        try {
+            await rm(this.skillDir(ns, name), { recursive: true });
+            return true;
+        }
+        catch {
+            return false;
+        }
+    }
     // --- Yank ---
     async yankVersion(ns, name, version) {
         const manifest = await this.readManifest(ns, name, version);
