@@ -6,7 +6,7 @@ export class Storage {
     useSymlinks = true;
     constructor(dataDir) {
         this.dataDir = dataDir;
-        this.blobDir = join(dataDir, ".blobs");
+        this.blobDir = join(dataDir, "blobs");
     }
     async init() {
         await mkdir(this.blobDir, { recursive: true });
@@ -59,7 +59,8 @@ export class Storage {
     }
     // --- Skill Metadata ---
     skillDir(ns, name) {
-        return join(this.dataDir, ns, name);
+        const cleanNs = ns.startsWith("@") ? ns.slice(1) : ns;
+        return join(this.dataDir, "skills", cleanNs, name);
     }
     async writeSkillMeta(ns, name, meta) {
         const dir = this.skillDir(ns, name);
@@ -153,14 +154,15 @@ export class Storage {
     async listAllSkills() {
         const skills = [];
         try {
-            const nsEntries = await readdir(this.dataDir);
+            const skillsBase = join(this.dataDir, "skills");
+            const nsEntries = await readdir(skillsBase);
             for (const ns of nsEntries) {
-                if (!ns.startsWith("@"))
+                if (ns.startsWith("."))
                     continue;
-                const nsPath = join(this.dataDir, ns);
+                const nsPath = join(skillsBase, ns);
                 const skillEntries = await readdir(nsPath);
                 for (const skillName of skillEntries) {
-                    const meta = await this.readSkillMeta(ns, skillName);
+                    const meta = await this.readSkillMeta("@" + ns, skillName);
                     if (meta)
                         skills.push(meta);
                 }
@@ -203,7 +205,7 @@ export class Storage {
     }
     // --- Agents ---
     agentDir() {
-        return join(this.dataDir, ".agents");
+        return join(this.dataDir, "agents");
     }
     agentPath(id) {
         return join(this.agentDir(), id + ".json");

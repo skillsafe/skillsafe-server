@@ -59,19 +59,20 @@ skillsafe --api-base http://localhost:9876 install @ns/name
 
 ```
 ./data/
-  @namespace/
-    skill-name/
-      skill.json              # Skill metadata
-      versions/
-        1.0.0/
-          manifest.json       # Version manifest + file list
-          scan_report.json    # Scan report (if uploaded)
-          verification.json   # Verification result (if run)
-          files/              # Symlinks (or copies) into .blobs/
-  .agents/
+  skills/
+    namespace/
+      skill-name/
+        skill.json              # Skill metadata
+        versions/
+          1.0.0/
+            manifest.json       # Version manifest + file list
+            scan_report.json    # Scan report (if uploaded)
+            verification.json   # Verification result (if run)
+            files/              # Symlinks (or copies) into blobs/
+  agents/
     agt_xxxxx/
       agent.json              # Agent metadata
-  .blobs/
+  blobs/
     <xx>/
       <sha256-hex>            # Content-addressed blob store
 ```

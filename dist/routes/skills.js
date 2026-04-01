@@ -313,12 +313,12 @@ export function skillRoutes(storage) {
     return app;
 }
 function computeTreeHash(files) {
-    const sorted = [...files].sort((a, b) => a.path.localeCompare(b.path));
+    const sorted = [...files].sort((a, b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0);
     // Strip "sha256:" prefix from hash values to match CLI's compute_tree_hash_v2
     const data = sorted.map((f) => {
         const hexHash = f.hash.startsWith("sha256:") ? f.hash.slice(7) : f.hash;
-        return `${f.path}\t${hexHash}\t${f.size}`;
-    }).join("\n");
+        return `${f.path}\0${hexHash}\n`;
+    }).join("");
     return "sha256tree:" + createHash("sha256").update(data).digest("hex");
 }
 //# sourceMappingURL=skills.js.map
