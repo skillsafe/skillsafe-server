@@ -24,23 +24,35 @@ export function verifyRoutes(storage) {
         if (!manifest)
             return apiError(c, 404, "not_found", "Version not found");
         const authorReport = await storage.readScanReport(ns, name, version);
-        // CLI sends { scan_report: { tree_hash, findings, ... } }
+        // CLI sends { scan_report: { skill_tree_hash, findings, ... } }
         const body = await c.req.json();
         const consumerReport = body.scan_report || body;
-        // Compare tree hashes
-        const authorTreeHash = manifest.tree_hash;
-        const consumerTreeHash = consumerReport.tree_hash || "";
+        // Compare tree hashes — match cloud verification logic
+        // Publisher tree hash: prefer scan report's skill_tree_hash, fall back to manifest
+        const authorTreeHash = authorReport?.skill_tree_hash || manifest.tree_hash;
+        // Consumer tree hash: CLI sends skill_tree_hash (not tree_hash)
+        const consumerTreeHash = consumerReport.skill_tree_hash || consumerReport.tree_hash || "";
         let verdict;
-        if (authorTreeHash !== consumerTreeHash) {
+        if (!consumerTreeHash) {
+            // Consumer didn't send a tree hash — can't verify
             verdict = "divergent";
         }
-        else if (consumerReport.findings?.some((f) => f.severity === "critical") &&
-            authorReport &&
-            !authorReport.findings?.some((f) => f.severity === "critical")) {
+        else if (authorTreeHash !== consumerTreeHash) {
+            // Tree hash mismatch = possible tampering (matches cloud: critical)
             verdict = "critical";
         }
         else {
-            verdict = "verified";
+            // Tree hashes match — compare scan results
+            const authorClean = authorReport?.clean === true;
+            const consumerClean = consumerReport.clean === true;
+            const authorFindings = authorReport?.findings_count ?? authorReport?.findings?.length ?? 0;
+            const consumerFindings = consumerReport.findings_count ?? consumerReport.findings?.length ?? 0;
+            if (authorClean !== consumerClean || authorFindings !== consumerFindings) {
+                verdict = "divergent";
+            }
+            else {
+                verdict = "verified";
+            }
         }
         const result = {
             verdict,
