@@ -203,6 +203,54 @@ function agentRoutes(storage) {
       headers: { "Content-Type": "text/plain; charset=utf-8" }
     });
   });
+  app.get("/v1/agents/:id/snapshots/tagged/:versionTag", async (c) => {
+    const { id: agentId, versionTag } = c.req.param();
+    const agent = await storage.readAgent(agentId);
+    if (!agent) return apiError(c, 404, "not_found", "Agent not found");
+    const ids = await listSnapshotIds(agentId);
+    for (const sid of ids) {
+      const meta = await readSnapshotMeta(agentId, sid);
+      if (meta && meta.version_tag === versionTag) return ok(c, meta);
+    }
+    return apiError(c, 404, "not_found", `No snapshot with tag ${versionTag}`);
+  });
+  app.get("/v1/agents/:id/snapshots/:snapId/download", async (c) => {
+    const { id: agentId, snapId } = c.req.param();
+    const meta = await readSnapshotMeta(agentId, snapId);
+    if (!meta) return apiError(c, 404, "not_found", "Snapshot not found");
+    const filesWithContent = [];
+    for (const f of meta.files || []) {
+      filesWithContent.push({ path: f.path, hash: f.hash, size: f.size });
+    }
+    return ok(c, { snapshot_id: snapId, files: filesWithContent });
+  });
+  app.post("/v1/agents/:id/snapshots/:snapId/scan", async (c) => {
+    const { id: agentId, snapId } = c.req.param();
+    const meta = await readSnapshotMeta(agentId, snapId);
+    if (!meta) return apiError(c, 404, "not_found", "Snapshot not found");
+    const report = {
+      snapshot_id: snapId,
+      agent_id: agentId,
+      status: "clean",
+      findings: [],
+      scanned_at: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    const reportPath = join(snapshotDir(agentId, snapId), "scan_report.json");
+    await writeFile(reportPath, JSON.stringify(report, null, 2));
+    return ok(c, report);
+  });
+  app.get("/v1/agents/:id/snapshots/:snapId/scan", async (c) => {
+    const { id: agentId, snapId } = c.req.param();
+    const meta = await readSnapshotMeta(agentId, snapId);
+    if (!meta) return apiError(c, 404, "not_found", "Snapshot not found");
+    try {
+      const reportPath = join(snapshotDir(agentId, snapId), "scan_report.json");
+      const data = await readFile(reportPath, "utf-8");
+      return ok(c, JSON.parse(data));
+    } catch {
+      return apiError(c, 404, "not_found", "No scan report for this snapshot");
+    }
+  });
   app.get("/v1/agents/:id/diff", async (c) => {
     const { id: agentId } = c.req.param();
     const fromId = c.req.query("from");

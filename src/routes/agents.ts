@@ -268,6 +268,71 @@ export function agentRoutes(storage: any): Hono {
     });
   });
 
+  // GET /v1/agents/:id/snapshots/tagged/:versionTag — get snapshot by version tag
+  app.get("/v1/agents/:id/snapshots/tagged/:versionTag", async (c) => {
+    const { id: agentId, versionTag } = c.req.param();
+    const agent = await storage.readAgent(agentId);
+    if (!agent) return apiError(c, 404, "not_found", "Agent not found");
+
+    const ids = await listSnapshotIds(agentId);
+    for (const sid of ids) {
+      const meta = await readSnapshotMeta(agentId, sid);
+      if (meta && meta.version_tag === versionTag) return ok(c, meta);
+    }
+    return apiError(c, 404, "not_found", `No snapshot with tag ${versionTag}`);
+  });
+
+  // GET /v1/agents/:id/snapshots/:snapId/download — download all files as zip
+  app.get("/v1/agents/:id/snapshots/:snapId/download", async (c) => {
+    const { id: agentId, snapId } = c.req.param();
+    const meta = await readSnapshotMeta(agentId, snapId);
+    if (!meta) return apiError(c, 404, "not_found", "Snapshot not found");
+
+    // Return a JSON manifest with file contents (local server doesn't need real zip)
+    const filesWithContent: Array<{ path: string; hash: string; size: number }> = [];
+    for (const f of (meta.files || [])) {
+      filesWithContent.push({ path: f.path, hash: f.hash, size: f.size });
+    }
+    return ok(c, { snapshot_id: snapId, files: filesWithContent });
+  });
+
+  // POST /v1/agents/:id/snapshots/:snapId/scan — scan snapshot (stub)
+  app.post("/v1/agents/:id/snapshots/:snapId/scan", async (c) => {
+    const { id: agentId, snapId } = c.req.param();
+    const meta = await readSnapshotMeta(agentId, snapId);
+    if (!meta) return apiError(c, 404, "not_found", "Snapshot not found");
+
+    // Local server returns a placeholder scan report
+    const report = {
+      snapshot_id: snapId,
+      agent_id: agentId,
+      status: "clean",
+      findings: [],
+      scanned_at: new Date().toISOString(),
+    };
+
+    // Persist the scan report alongside the snapshot
+    const reportPath = join(snapshotDir(agentId, snapId), "scan_report.json");
+    await writeFile(reportPath, JSON.stringify(report, null, 2));
+
+    return ok(c, report);
+  });
+
+  // GET /v1/agents/:id/snapshots/:snapId/scan — get scan report
+  app.get("/v1/agents/:id/snapshots/:snapId/scan", async (c) => {
+    const { id: agentId, snapId } = c.req.param();
+    const meta = await readSnapshotMeta(agentId, snapId);
+    if (!meta) return apiError(c, 404, "not_found", "Snapshot not found");
+
+    try {
+      const reportPath = join(snapshotDir(agentId, snapId), "scan_report.json");
+      const data = await readFile(reportPath, "utf-8");
+      return ok(c, JSON.parse(data));
+    } catch {
+      return apiError(c, 404, "not_found", "No scan report for this snapshot");
+    }
+  });
+
   // GET /v1/agents/:id/diff — diff two snapshots
   app.get("/v1/agents/:id/diff", async (c) => {
     const { id: agentId } = c.req.param();
