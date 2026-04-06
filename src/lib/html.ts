@@ -235,6 +235,8 @@ html.theme-transitioning,html.theme-transitioning *,html.theme-transitioning *::
 }
 .divider{height:1px;background:var(--border);border:none;margin:0}
 .visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 var(--radius) 0;transition:top .15s}
+.skip-link:focus{top:0}
 
 /* ─── Header ─── */
 .site-header{
@@ -340,7 +342,7 @@ export function baseHtml(opts: {
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
   <script>
     (function(){
       var t=localStorage.getItem("ss_theme")||"system";
@@ -353,7 +355,7 @@ export function baseHtml(opts: {
   ${head}
 </head>
 <body>
-  <a href="#main-content" class="visually-hidden">Skip to main content</a>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <header class="site-header">
     <nav class="container site-nav" aria-label="Main navigation">
       <div class="nav-left">
