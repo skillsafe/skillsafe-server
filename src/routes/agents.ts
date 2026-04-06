@@ -222,6 +222,21 @@ export function agentRoutes(storage: any): Hono {
     return ok(c, snapshots[0]);
   });
 
+  // GET /v1/agents/:id/snapshots/tagged/:versionTag — get snapshot by version tag
+  // NOTE: Must be registered BEFORE /:snapId to prevent "tagged" matching as a snapId
+  app.get("/v1/agents/:id/snapshots/tagged/:versionTag", async (c) => {
+    const { id: agentId, versionTag } = c.req.param();
+    const agent = await storage.readAgent(agentId);
+    if (!agent) return apiError(c, 404, "not_found", "Agent not found");
+
+    const ids = await listSnapshotIds(agentId);
+    for (const sid of ids) {
+      const meta = await readSnapshotMeta(agentId, sid);
+      if (meta && meta.version_tag === versionTag) return ok(c, meta);
+    }
+    return apiError(c, 404, "not_found", `No snapshot with tag ${versionTag}`);
+  });
+
   // GET /v1/agents/:id/snapshots/:snapId — get specific snapshot
   app.get("/v1/agents/:id/snapshots/:snapId", async (c) => {
     const { id: agentId, snapId } = c.req.param();
@@ -266,20 +281,6 @@ export function agentRoutes(storage: any): Hono {
     return new Response(blob, {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
-  });
-
-  // GET /v1/agents/:id/snapshots/tagged/:versionTag — get snapshot by version tag
-  app.get("/v1/agents/:id/snapshots/tagged/:versionTag", async (c) => {
-    const { id: agentId, versionTag } = c.req.param();
-    const agent = await storage.readAgent(agentId);
-    if (!agent) return apiError(c, 404, "not_found", "Agent not found");
-
-    const ids = await listSnapshotIds(agentId);
-    for (const sid of ids) {
-      const meta = await readSnapshotMeta(agentId, sid);
-      if (meta && meta.version_tag === versionTag) return ok(c, meta);
-    }
-    return apiError(c, 404, "not_found", `No snapshot with tag ${versionTag}`);
   });
 
   // GET /v1/agents/:id/snapshots/:snapId/download — download all files as zip

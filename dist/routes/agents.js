@@ -171,6 +171,17 @@ function agentRoutes(storage) {
     snapshots.sort((a, b) => new Date(b.snapshot_at).getTime() - new Date(a.snapshot_at).getTime());
     return ok(c, snapshots[0]);
   });
+  app.get("/v1/agents/:id/snapshots/tagged/:versionTag", async (c) => {
+    const { id: agentId, versionTag } = c.req.param();
+    const agent = await storage.readAgent(agentId);
+    if (!agent) return apiError(c, 404, "not_found", "Agent not found");
+    const ids = await listSnapshotIds(agentId);
+    for (const sid of ids) {
+      const meta = await readSnapshotMeta(agentId, sid);
+      if (meta && meta.version_tag === versionTag) return ok(c, meta);
+    }
+    return apiError(c, 404, "not_found", `No snapshot with tag ${versionTag}`);
+  });
   app.get("/v1/agents/:id/snapshots/:snapId", async (c) => {
     const { id: agentId, snapId } = c.req.param();
     const meta = await readSnapshotMeta(agentId, snapId);
@@ -202,17 +213,6 @@ function agentRoutes(storage) {
     return new Response(blob, {
       headers: { "Content-Type": "text/plain; charset=utf-8" }
     });
-  });
-  app.get("/v1/agents/:id/snapshots/tagged/:versionTag", async (c) => {
-    const { id: agentId, versionTag } = c.req.param();
-    const agent = await storage.readAgent(agentId);
-    if (!agent) return apiError(c, 404, "not_found", "Agent not found");
-    const ids = await listSnapshotIds(agentId);
-    for (const sid of ids) {
-      const meta = await readSnapshotMeta(agentId, sid);
-      if (meta && meta.version_tag === versionTag) return ok(c, meta);
-    }
-    return apiError(c, 404, "not_found", `No snapshot with tag ${versionTag}`);
   });
   app.get("/v1/agents/:id/snapshots/:snapId/download", async (c) => {
     const { id: agentId, snapId } = c.req.param();
