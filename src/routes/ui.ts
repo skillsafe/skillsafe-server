@@ -51,9 +51,6 @@ export function uiRoutes(dataDir?: string): Hono {
   app.get("/agent/:id", agentDetailPage);
   app.get("/agent/:id/", agentDetailPage);
 
-  // ─── 404 ──────────────────────────────────────────────────────────────────
-  app.notFound((c) => notFound(new URL(c.req.url).pathname));
-
   return app;
 }
 

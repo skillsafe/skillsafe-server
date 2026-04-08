@@ -8,6 +8,7 @@ import { blobRoutes } from "./routes/blobs.js";
 import { scanRoutes } from "./routes/scan.js";
 import { verifyRoutes } from "./routes/verify.js";
 import { uiRoutes } from "./routes/ui.js";
+import { notFound } from "./lib/html.js";
 import type { Storage } from "./storage.js";
 
 const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
@@ -44,6 +45,9 @@ export function createApp(storage: Storage, token: string | null): Hono {
   app.route("", blobRoutes(storage));
   app.route("", scanRoutes(storage));
   app.route("", verifyRoutes(storage));
+
+  // 404 handler — must be after all routes so API routes are reachable
+  app.notFound((c) => notFound(new URL(c.req.url).pathname));
 
   return app;
 }
