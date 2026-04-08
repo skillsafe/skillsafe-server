@@ -26,7 +26,6 @@ function uiRoutes(dataDir) {
   app.get("/skill/*", skillDetailPage);
   app.get("/agent/:id", agentDetailPage);
   app.get("/agent/:id/", agentDetailPage);
-  app.notFound((c) => notFound(new URL(c.req.url).pathname));
   return app;
 }
 function dashboardPage(c) {

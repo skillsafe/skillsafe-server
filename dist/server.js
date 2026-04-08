@@ -8,6 +8,7 @@ import { blobRoutes } from "./routes/blobs.js";
 import { scanRoutes } from "./routes/scan.js";
 import { verifyRoutes } from "./routes/verify.js";
 import { uiRoutes } from "./routes/ui.js";
+import { notFound } from "./lib/html.js";
 const WRITE_METHODS = /* @__PURE__ */ new Set(["POST", "PUT", "PATCH", "DELETE"]);
 function createApp(storage, token) {
   const app = new Hono();
@@ -33,6 +34,7 @@ function createApp(storage, token) {
   app.route("", blobRoutes(storage));
   app.route("", scanRoutes(storage));
   app.route("", verifyRoutes(storage));
+  app.notFound((c) => notFound(new URL(c.req.url).pathname));
   return app;
 }
 export {
