@@ -79,7 +79,7 @@ const GLOBAL_CSS = `
   --bg-elevated: #ffffff;
   --bg-surface: #ffffff;
   --bg-surface-hover: #f0f1f5;
-  --bg-overlay: rgba(248,249,252,0.92);
+  --bg-overlay: rgba(248,249,252,1);
   --border: #d8dce6;
   --border-hover: #bfc4d1;
   --border-accent: #2b7fff40;
@@ -132,7 +132,7 @@ body::before{
   pointer-events:none;z-index:0;
 }
 [data-theme="light"] body::before{
-  background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(26,107,239,0.06),transparent);
+  background:none;
 }
 a{color:var(--accent-fg);text-decoration:none;transition:color var(--transition)}
 a:hover{color:var(--accent-hover)}
@@ -235,8 +235,7 @@ html.theme-transitioning,html.theme-transitioning *,html.theme-transitioning *::
 }
 .divider{height:1px;background:var(--border);border:none;margin:0}
 .visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#fff;padding:8px 16px;z-index:1000;border-radius:0 0 var(--radius) 0;transition:top .15s}
-.skip-link:focus{top:0}
+
 
 /* ─── Header ─── */
 .site-header{
@@ -355,7 +354,6 @@ export function baseHtml(opts: {
   ${head}
 </head>
 <body>
-  <a href="#main-content" class="skip-link">Skip to main content</a>
   <header class="site-header">
     <nav class="container site-nav" aria-label="Main navigation">
       <div class="nav-left">
