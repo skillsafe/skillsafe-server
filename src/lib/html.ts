@@ -79,7 +79,7 @@ const GLOBAL_CSS = `
   --bg-elevated: #ffffff;
   --bg-surface: #ffffff;
   --bg-surface-hover: #f0f1f5;
-  --bg-overlay: rgba(248,249,252,1);
+  --bg-overlay: rgba(248,249,252,0.92);
   --border: #d8dce6;
   --border-hover: #bfc4d1;
   --border-accent: #2b7fff40;
