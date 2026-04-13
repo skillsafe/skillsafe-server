@@ -1,1 +1,7 @@
-{"version":3,"file":"utility.js","sourceRoot":"","sources":["../../src/routes/utility.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,IAAI,EAAE,MAAM,MAAM,CAAC;AAC5B,OAAO,EAAE,EAAE,EAAE,MAAM,oBAAoB,CAAC;AAExC,MAAM,CAAC,MAAM,aAAa,GAAG,IAAI,IAAI,EAAE,CAAC;AAExC,aAAa,CAAC,GAAG,CAAC,YAAY,EAAE,CAAC,CAAC,EAAE,EAAE;IACpC,OAAO,EAAE,CAAC,CAAC,EAAE,EAAE,MAAM,EAAE,IAAI,EAAE,OAAO,EAAE,OAAO,EAAE,CAAC,CAAC;AACnD,CAAC,CAAC,CAAC;AAEH,aAAa,CAAC,GAAG,CAAC,aAAa,EAAE,CAAC,CAAC,EAAE,EAAE;IACrC,OAAO,EAAE,CAAC,CAAC,EAAE;QACX,QAAQ,EAAE,OAAO;QACjB,IAAI,EAAE,OAAO;QACb,cAAc,EAAE,IAAI;KACrB,CAAC,CAAC;AACL,CAAC,CAAC,CAAC"}
+{
+  "version": 3,
+  "sources": ["../../src/routes/utility.ts"],
+  "sourcesContent": ["import { Hono } from \"hono\";\nimport { ok } from \"../lib/response.js\";\n\nexport const utilityRoutes = new Hono();\n\nutilityRoutes.get(\"/v1/health\", (c) => {\n  return ok(c, { status: \"ok\", version: \"0.1.0\" });\n});\n\nutilityRoutes.get(\"/v1/account\", (c) => {\n  return ok(c, {\n    username: \"local\",\n    tier: \"local\",\n    email_verified: true,\n  });\n});\n"],
+  "mappings": "AAAA,SAAS,YAAY;AACrB,SAAS,UAAU;AAEZ,MAAM,gBAAgB,IAAI,KAAK;AAEtC,cAAc,IAAI,cAAc,CAAC,MAAM;AACrC,SAAO,GAAG,GAAG,EAAE,QAAQ,MAAM,SAAS,QAAQ,CAAC;AACjD,CAAC;AAED,cAAc,IAAI,eAAe,CAAC,MAAM;AACtC,SAAO,GAAG,GAAG;AAAA,IACX,UAAU;AAAA,IACV,MAAM;AAAA,IACN,gBAAgB;AAAA,EAClB,CAAC;AACH,CAAC;",
+  "names": []
+}
