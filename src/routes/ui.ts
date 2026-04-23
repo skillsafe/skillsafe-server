@@ -646,7 +646,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
         <div class="sidebar-section">
           <h2 class="sidebar-heading">Install <span class="sidebar-heading-hint">(Copy One)</span></h2>
           <div class="install-cmd" id="install-cmd-curl">
-            <code id="install-cmd-text-curl">curl -fsSL https://skillsafe.ai/scripts/skillsafe.py | python3 - install --api-base ${origin} ${h(nsDisplay)}/${h(name)}</code>
+            <code id="install-cmd-text-curl">pip install skillsafe && skillsafe --api-base ${origin} install ${h(nsDisplay)}/${h(name)}</code>
             <button class="copy-btn" id="copy-install-curl" type="button" aria-label="Copy curl install command" onclick="copyCurl()">
               <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               <span class="visually-hidden copy-label" aria-live="polite">Copy</span>
@@ -1136,7 +1136,7 @@ function skillDetailPage(c: Parameters<Parameters<Hono["get"]>[1]>[0]) {
     }
 
     // Regular skill sidebar
-    var curlCmd="curl -fsSL https://skillsafe.ai/scripts/skillsafe.py | python3 - install --api-base "+ORIGIN+" "+hEsc(skill.namespace)+"/"+hEsc(skill.name);
+    var curlCmd="pip install skillsafe && skillsafe --api-base "+ORIGIN+" install "+hEsc(skill.namespace)+"/"+hEsc(skill.name);
     var cliCmd="skillsafe --api-base "+ORIGIN+" install "+hEsc(skill.namespace)+"/"+hEsc(skill.name);
     document.getElementById("install-cmd-text-curl").textContent=curlCmd;
     document.getElementById("install-cmd-text-cli").textContent=cliCmd;
