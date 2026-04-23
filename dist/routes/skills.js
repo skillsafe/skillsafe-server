@@ -169,7 +169,7 @@ function skillRoutes(storage) {
   app.get("/v1/skills/search", async (c) => {
     const q = (c.req.query("q") || "").toLowerCase();
     const category = c.req.query("category");
-    const tagsParam = c.req.query("tags");
+    const tagsParam = c.req.query("tags") || c.req.query("tag");
     const page = parseInt(c.req.query("page") || "1");
     const limit = parseInt(c.req.query("limit") || "20");
     let all = await storage.listAllSkills();
