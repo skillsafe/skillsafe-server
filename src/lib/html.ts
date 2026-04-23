@@ -132,7 +132,7 @@ body::before{
   pointer-events:none;z-index:0;
 }
 [data-theme="light"] body::before{
-  background:none;
+  background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(26,107,239,0.06),transparent);
 }
 a{color:var(--accent-fg);text-decoration:none;transition:color var(--transition)}
 a:hover{color:var(--accent-hover)}
@@ -183,6 +183,7 @@ pre code{background:none;padding:0;border:none;font-size:inherit}
 .badge-red{background:var(--red-dim);color:var(--red)}
 .badge-blue{background:var(--accent-muted);color:var(--accent-fg)}
 .badge-orange{background:var(--amber-dim);color:var(--amber)}
+.badge-yellow{background:var(--amber-dim);color:var(--amber)}
 .badge-purple{background:var(--purple-dim);color:var(--purple)}
 .badge-neutral{background:var(--bg-elevated);color:var(--text-tertiary);border:1px solid var(--border)}
 
