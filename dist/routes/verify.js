@@ -25,10 +25,12 @@ function verifyRoutes(storage) {
       verdict = "divergent";
     } else if (authorTreeHash !== consumerTreeHash) {
       verdict = "critical";
+    } else if (!authorReport) {
+      verdict = "verified";
     } else {
-      const authorClean = authorReport?.clean === true;
+      const authorClean = authorReport.clean === true;
       const consumerClean = consumerReport.clean === true;
-      const authorFindings = authorReport?.findings_count ?? authorReport?.findings?.length ?? 0;
+      const authorFindings = authorReport.findings_count ?? authorReport.findings?.length ?? 0;
       const consumerFindings = consumerReport.findings_count ?? consumerReport.findings?.length ?? 0;
       if (authorClean !== consumerClean || authorFindings !== consumerFindings) {
         verdict = "divergent";

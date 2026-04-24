@@ -1319,7 +1319,7 @@ function skillDetailPage(c) {
         throw new Error("no readme");
       })
       .then(function(md){
-        readmeEl.innerHTML='<div class="readme-rendered readme-markdown">'+renderMarkdown(md)+'</div>';
+        readmeEl.innerHTML=renderMarkdown(md);
       })
       .catch(function(){
         readmeEl.innerHTML='<div class="readme-rendered"><p style="color:var(--text-tertiary);font-style:italic">No SKILL.md available.</p></div>';
