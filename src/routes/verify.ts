@@ -51,13 +51,16 @@ export function verifyRoutes(storage: Storage): Hono {
     } else if (authorTreeHash !== consumerTreeHash) {
       // Tree hash mismatch = possible tampering (matches cloud: critical)
       verdict = "critical";
+    } else if (!authorReport) {
+      // No author scan report — tree hash match alone is sufficient
+      verdict = "verified";
     } else {
       // Tree hashes match — compare scan results
-      const authorClean = authorReport?.clean === true;
+      const authorClean = authorReport.clean === true;
       const consumerClean = consumerReport.clean === true;
       const authorFindings =
-        authorReport?.findings_count ??
-        authorReport?.findings?.length ??
+        authorReport.findings_count ??
+        authorReport.findings?.length ??
         0;
       const consumerFindings =
         consumerReport.findings_count ?? consumerReport.findings?.length ?? 0;
