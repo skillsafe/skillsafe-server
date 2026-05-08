@@ -245,6 +245,22 @@ export function agentRoutes(storage: any): Hono {
     return ok(c, meta);
   });
 
+  // PATCH /v1/agents/:id/snapshots/:snapId — update snapshot metadata (currently version_tag only)
+  app.patch("/v1/agents/:id/snapshots/:snapId", async (c) => {
+    const { id: agentId, snapId } = c.req.param();
+    const meta = await readSnapshotMeta(agentId, snapId);
+    if (!meta) return apiError(c, 404, "not_found", "Snapshot not found");
+
+    const body = await c.req.json<{ version_tag?: string | null }>();
+    if (body.version_tag !== undefined) {
+      meta.version_tag = body.version_tag === "" ? null : body.version_tag;
+    }
+    meta.updated_at = new Date().toISOString();
+
+    await writeFile(join(snapshotDir(agentId, snapId), "meta.json"), JSON.stringify(meta, null, 2));
+    return ok(c, meta);
+  });
+
   // DELETE /v1/agents/:id/snapshots/:snapId — delete snapshot
   app.delete("/v1/agents/:id/snapshots/:snapId", async (c) => {
     const { id: agentId, snapId } = c.req.param();

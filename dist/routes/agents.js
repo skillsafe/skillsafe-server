@@ -188,6 +188,18 @@ function agentRoutes(storage) {
     if (!meta) return apiError(c, 404, "not_found", "Snapshot not found");
     return ok(c, meta);
   });
+  app.patch("/v1/agents/:id/snapshots/:snapId", async (c) => {
+    const { id: agentId, snapId } = c.req.param();
+    const meta = await readSnapshotMeta(agentId, snapId);
+    if (!meta) return apiError(c, 404, "not_found", "Snapshot not found");
+    const body = await c.req.json();
+    if (body.version_tag !== void 0) {
+      meta.version_tag = body.version_tag === "" ? null : body.version_tag;
+    }
+    meta.updated_at = (/* @__PURE__ */ new Date()).toISOString();
+    await writeFile(join(snapshotDir(agentId, snapId), "meta.json"), JSON.stringify(meta, null, 2));
+    return ok(c, meta);
+  });
   app.delete("/v1/agents/:id/snapshots/:snapId", async (c) => {
     const { id: agentId, snapId } = c.req.param();
     const meta = await readSnapshotMeta(agentId, snapId);
