@@ -401,7 +401,7 @@ export function baseHtml(opts: {
         <div class="footer-links">
           <a href="https://skillsafe.ai/docs/" target="_blank" rel="noopener noreferrer">Docs</a>
           <a href="https://skillsafe.ai/" target="_blank" rel="noopener noreferrer">skillsafe.ai</a>
-          <a href="https://github.com/skillsafe/skillsafe-cli" target="_blank" rel="noopener noreferrer">CLI</a>
+          <a href="https://www.npmjs.com/package/@skillsafe/cli" target="_blank" rel="noopener noreferrer">CLI</a>
         </div>
       </nav>
     </div>
