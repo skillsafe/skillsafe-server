@@ -10,9 +10,10 @@ import type { FileEntry } from "../lib/types.js";
  * e.g. /v1/skills/@alice/test-skill/versions/1.0.0/yank
  *      → { ns: "@alice", name: "test-skill", rest: "versions/1.0.0/yank" }
  *
- * Hono has a bug where @:ns/:name patterns only capture ns but leave name undefined
- * when the named params follow a literal `@` character.  We work around this by
- * parsing the path ourselves.
+ * Routes register ":ns/:name" (not "@:ns/:name"): with the agent snapshot routes
+ * mounted, Hono's SmartRouter falls back to TrieRouter, which won't match a literal
+ * "@" fused with a param in one segment. So ":ns" captures the leading "@", which we
+ * strip back out here.
  */
 function parseSkillPath(
   path: string
@@ -26,7 +27,7 @@ export function skillRoutes(storage: Storage): Hono {
   const app = new Hono();
 
   // Negotiate — must be registered before the plain save route
-  app.post("/v1/skills/@:ns/:name/negotiate", async (c) => {
+  app.post("/v1/skills/:ns/:name/negotiate", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;
@@ -49,7 +50,7 @@ export function skillRoutes(storage: Storage): Hono {
   });
 
   // Save
-  app.post("/v1/skills/@:ns/:name", async (c) => {
+  app.post("/v1/skills/:ns/:name", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;
@@ -168,7 +169,7 @@ export function skillRoutes(storage: Storage): Hono {
   });
 
   // Get metadata
-  app.get("/v1/skills/@:ns/:name", async (c) => {
+  app.get("/v1/skills/:ns/:name", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;
@@ -192,7 +193,7 @@ export function skillRoutes(storage: Storage): Hono {
   });
 
   // List versions
-  app.get("/v1/skills/@:ns/:name/versions", async (c) => {
+  app.get("/v1/skills/:ns/:name/versions", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;
@@ -209,7 +210,7 @@ export function skillRoutes(storage: Storage): Hono {
   });
 
   // Download
-  app.get("/v1/skills/@:ns/:name/download/:version", async (c) => {
+  app.get("/v1/skills/:ns/:name/download/:version", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;
@@ -290,7 +291,7 @@ export function skillRoutes(storage: Storage): Hono {
   });
 
   // Yank
-  app.post("/v1/skills/@:ns/:name/versions/:version/yank", async (c) => {
+  app.post("/v1/skills/:ns/:name/versions/:version/yank", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;
@@ -305,7 +306,7 @@ export function skillRoutes(storage: Storage): Hono {
   });
 
   // Get specific version details (used by skill detail page for Files/Security/BOM tabs)
-  app.get("/v1/skills/@:ns/:name/versions/:version", async (c) => {
+  app.get("/v1/skills/:ns/:name/versions/:version", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;
@@ -338,7 +339,7 @@ export function skillRoutes(storage: Storage): Hono {
   });
 
   // README — serve SKILL.md (or first .md file) as plain text
-  app.get("/v1/skills/@:ns/:name/readme", async (c) => {
+  app.get("/v1/skills/:ns/:name/readme", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;
@@ -365,19 +366,19 @@ export function skillRoutes(storage: Storage): Hono {
   });
 
   // Stubs for endpoints used by skill detail page (return empty data)
-  app.get("/v1/skills/@:ns/:name/related", async (c) =>
+  app.get("/v1/skills/:ns/:name/related", async (c) =>
     ok(c, [], { pagination: { has_more: false } })
   );
-  app.get("/v1/skills/@:ns/:name/eval", async (c) => ok(c, null));
-  app.get("/v1/skills/@:ns/:name/arenas", async (c) =>
+  app.get("/v1/skills/:ns/:name/eval", async (c) => ok(c, null));
+  app.get("/v1/skills/:ns/:name/arenas", async (c) =>
     ok(c, [], { pagination: { has_more: false } })
   );
-  app.get("/v1/skills/@:ns/:name/children", async (c) =>
+  app.get("/v1/skills/:ns/:name/children", async (c) =>
     ok(c, [], { pagination: { has_more: false } })
   );
 
   // Delete skill
-  app.delete("/v1/skills/@:ns/:name", async (c) => {
+  app.delete("/v1/skills/:ns/:name", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;

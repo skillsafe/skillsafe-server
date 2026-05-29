@@ -9,7 +9,7 @@ function parseSkillPath(path) {
 }
 function skillRoutes(storage) {
   const app = new Hono();
-  app.post("/v1/skills/@:ns/:name/negotiate", async (c) => {
+  app.post("/v1/skills/:ns/:name/negotiate", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;
@@ -26,7 +26,7 @@ function skillRoutes(storage) {
     }
     return ok(c, { needed_files: neededFiles, existing_blobs: existingBlobs });
   });
-  app.post("/v1/skills/@:ns/:name", async (c) => {
+  app.post("/v1/skills/:ns/:name", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;
@@ -114,7 +114,7 @@ function skillRoutes(storage) {
       latest_version: version
     });
   });
-  app.get("/v1/skills/@:ns/:name", async (c) => {
+  app.get("/v1/skills/:ns/:name", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;
@@ -131,7 +131,7 @@ function skillRoutes(storage) {
       visibility: "private"
     });
   });
-  app.get("/v1/skills/@:ns/:name/versions", async (c) => {
+  app.get("/v1/skills/:ns/:name/versions", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;
@@ -144,7 +144,7 @@ function skillRoutes(storage) {
       pagination: { has_more: start + limit < all.length }
     });
   });
-  app.get("/v1/skills/@:ns/:name/download/:version", async (c) => {
+  app.get("/v1/skills/:ns/:name/download/:version", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;
@@ -208,7 +208,7 @@ function skillRoutes(storage) {
       pagination: { has_more: start + limit < all.length }
     });
   });
-  app.post("/v1/skills/@:ns/:name/versions/:version/yank", async (c) => {
+  app.post("/v1/skills/:ns/:name/versions/:version/yank", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;
@@ -218,7 +218,7 @@ function skillRoutes(storage) {
     if (!yanked) return apiError(c, 404, "not_found", "Version not found");
     return ok(c, { namespace: ns, name, version, yanked: true });
   });
-  app.get("/v1/skills/@:ns/:name/versions/:version", async (c) => {
+  app.get("/v1/skills/:ns/:name/versions/:version", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;
@@ -239,7 +239,7 @@ function skillRoutes(storage) {
       verifications: []
     });
   });
-  app.get("/v1/skills/@:ns/:name/readme", async (c) => {
+  app.get("/v1/skills/:ns/:name/readme", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;
@@ -257,19 +257,19 @@ function skillRoutes(storage) {
     return c.body(content);
   });
   app.get(
-    "/v1/skills/@:ns/:name/related",
+    "/v1/skills/:ns/:name/related",
     async (c) => ok(c, [], { pagination: { has_more: false } })
   );
-  app.get("/v1/skills/@:ns/:name/eval", async (c) => ok(c, null));
+  app.get("/v1/skills/:ns/:name/eval", async (c) => ok(c, null));
   app.get(
-    "/v1/skills/@:ns/:name/arenas",
+    "/v1/skills/:ns/:name/arenas",
     async (c) => ok(c, [], { pagination: { has_more: false } })
   );
   app.get(
-    "/v1/skills/@:ns/:name/children",
+    "/v1/skills/:ns/:name/children",
     async (c) => ok(c, [], { pagination: { has_more: false } })
   );
-  app.delete("/v1/skills/@:ns/:name", async (c) => {
+  app.delete("/v1/skills/:ns/:name", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name } = p;

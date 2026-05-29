@@ -4,7 +4,7 @@ import type { Storage } from "../storage.js";
 
 /**
  * Parse @ns/name/rest from a skill API path.
- * Workaround for Hono bug where @:ns/:name patterns don't correctly capture all params.
+ * Routes use ":ns/:name"; ":ns" captures the leading "@", stripped here. See skills.ts.
  */
 function parseSkillPath(
   path: string
@@ -17,7 +17,7 @@ function parseSkillPath(
 export function scanRoutes(storage: Storage): Hono {
   const app = new Hono();
 
-  app.post("/v1/skills/@:ns/:name/versions/:version/scan", async (c) => {
+  app.post("/v1/skills/:ns/:name/versions/:version/scan", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;
@@ -35,7 +35,7 @@ export function scanRoutes(storage: Storage): Hono {
     return ok(c, { namespace: ns, name, version, scan_stored: true });
   });
 
-  app.get("/v1/skills/@:ns/:name/versions/:version/scan", async (c) => {
+  app.get("/v1/skills/:ns/:name/versions/:version/scan", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;

@@ -7,7 +7,7 @@ function parseSkillPath(path) {
 }
 function verifyRoutes(storage) {
   const app = new Hono();
-  app.post("/v1/skills/@:ns/:name/versions/:version/verify", async (c) => {
+  app.post("/v1/skills/:ns/:name/versions/:version/verify", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;
@@ -48,7 +48,7 @@ function verifyRoutes(storage) {
     await storage.writeVerification(ns, name, version, result);
     return ok(c, result);
   });
-  app.get("/v1/skills/@:ns/:name/versions/:version/verify", async (c) => {
+  app.get("/v1/skills/:ns/:name/versions/:version/verify", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;

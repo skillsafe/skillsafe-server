@@ -7,7 +7,7 @@ function parseSkillPath(path) {
 }
 function scanRoutes(storage) {
   const app = new Hono();
-  app.post("/v1/skills/@:ns/:name/versions/:version/scan", async (c) => {
+  app.post("/v1/skills/:ns/:name/versions/:version/scan", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;
@@ -20,7 +20,7 @@ function scanRoutes(storage) {
     await storage.writeScanReport(ns, name, version, report);
     return ok(c, { namespace: ns, name, version, scan_stored: true });
   });
-  app.get("/v1/skills/@:ns/:name/versions/:version/scan", async (c) => {
+  app.get("/v1/skills/:ns/:name/versions/:version/scan", async (c) => {
     const p = parseSkillPath(c.req.path);
     if (!p) return apiError(c, 400, "invalid_request", "Invalid skill path");
     const { ns, name, rest } = p;
