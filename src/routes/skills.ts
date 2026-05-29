@@ -65,7 +65,12 @@ export function skillRoutes(storage: Storage): Hono {
       typeof metadataRaw === "string"
         ? metadataRaw
         : await (metadataRaw as File).text();
-    const metadata = JSON.parse(metadataStr);
+    let metadata: any;
+    try {
+      metadata = JSON.parse(metadataStr);
+    } catch {
+      return apiError(c, 400, "invalid_request", "metadata field is not valid JSON");
+    }
 
     const { version, description, category, tags, changelog, file_manifest } =
       metadata;
@@ -131,7 +136,13 @@ export function skillRoutes(storage: Storage): Hono {
         typeof scanReportRaw === "string"
           ? scanReportRaw
           : await (scanReportRaw as File).text();
-      await storage.writeScanReport(ns, name, version, JSON.parse(scanStr));
+      let scanReport: unknown;
+      try {
+        scanReport = JSON.parse(scanStr);
+      } catch {
+        return apiError(c, 400, "invalid_request", "scan_report field is not valid JSON");
+      }
+      await storage.writeScanReport(ns, name, version, scanReport);
     }
 
     // Update or create skill metadata

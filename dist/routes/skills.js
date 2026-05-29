@@ -36,7 +36,12 @@ function skillRoutes(storage) {
       return apiError(c, 400, "invalid_request", "Missing metadata field");
     }
     const metadataStr = typeof metadataRaw === "string" ? metadataRaw : await metadataRaw.text();
-    const metadata = JSON.parse(metadataStr);
+    let metadata;
+    try {
+      metadata = JSON.parse(metadataStr);
+    } catch {
+      return apiError(c, 400, "invalid_request", "metadata field is not valid JSON");
+    }
     const { version, description, category, tags, changelog, file_manifest } = metadata;
     if (!isValidSemver(version)) {
       return apiError(c, 400, "invalid_version", `Invalid semver: ${version}`);
@@ -82,7 +87,13 @@ function skillRoutes(storage) {
     const scanReportRaw = formData.get("scan_report");
     if (scanReportRaw) {
       const scanStr = typeof scanReportRaw === "string" ? scanReportRaw : await scanReportRaw.text();
-      await storage.writeScanReport(ns, name, version, JSON.parse(scanStr));
+      let scanReport;
+      try {
+        scanReport = JSON.parse(scanStr);
+      } catch {
+        return apiError(c, 400, "invalid_request", "scan_report field is not valid JSON");
+      }
+      await storage.writeScanReport(ns, name, version, scanReport);
     }
     const existing = await storage.readSkillMeta(ns, name);
     const now = (/* @__PURE__ */ new Date()).toISOString();
